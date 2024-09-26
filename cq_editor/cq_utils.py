@@ -1,4 +1,5 @@
 import cadquery as cq
+import build123d as bd
 from cadquery.occ_impl.assembly import toCAF
 
 from typing import List, Union
@@ -51,6 +52,14 @@ def to_compound(obj : Union[cq.Workplane, List[cq.Workplane], cq.Shape, List[cq.
             vals.append(obj._faces)
         else:
             vals.extend(obj._edges)
+    elif isinstance(obj, bd.Shape):
+        vals.append(cq.Shape.cast(obj.wrapped))
+    elif isinstance(obj, list) and isinstance(obj[0], bd.Shape):
+        vals.extend(cq.Shape.cast(o.wrapped) for o in obj)
+    elif isinstance(obj, bd.Builder):
+        vals.append(cq.Shape.cast(obj._obj.wrapped))
+    elif isinstance(obj, list) and isinstance(obj[0], bd.Builder):
+        vals.extend(cq.Shape.cast(o._obj.wrapped) for o in obj)
     else:
         raise ValueError(f'Invalid type {type(obj)}')
 
