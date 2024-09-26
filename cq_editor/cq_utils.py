@@ -7,6 +7,7 @@ from importlib import reload
 from types import SimpleNamespace
 
 from OCP.XCAFPrs import XCAFPrs_AISObject
+from OCP.XCAFDoc import XCAFDoc_DocumentTool
 from OCP.TopoDS import TopoDS_Shape
 from OCP.AIS import AIS_InteractiveObject, AIS_Shape
 from OCP.Quantity import \
@@ -81,6 +82,11 @@ def make_AIS(obj : Union[cq.Workplane, List[cq.Workplane], cq.Shape, List[cq.Sha
 
     if isinstance(obj, cq.Assembly):
         label, shape = toCAF(obj)
+        ais = XCAFPrs_AISObject(label)
+    elif isinstance(obj, bd.Compound):
+        shape = bd.exporters3d._create_xde(obj)
+        shape_tool = XCAFDoc_DocumentTool.ShapeTool_s(shape.Main())
+        label = shape_tool.AddShape(obj.wrapped, bool(obj.children))
         ais = XCAFPrs_AISObject(label)
     elif isinstance(obj, AIS_InteractiveObject):
         ais = obj
